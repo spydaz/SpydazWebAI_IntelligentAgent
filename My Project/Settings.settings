@@ -1,0 +1,842 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="SourceCode" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Imports System
+Imports SpydazWebAI_IntelligentAgent.AI_AGENT.Devices
+
+Namespace AI_AGENT
+
+    Namespace Clients
+
+        ''' &lt;summary&gt;
+        ''' THis Class Enables for a Consumer of the Intelligent Agent Class To Interact With the
+        ''' Agent By Sending a UserInput to the Agent On Receipt of the Response It can be
+        ''' republished for use.
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public MustInherit Class InteractiveConsumer
+
+            Public WithEvents Agent As New IntelligentAgent
+
+            ''' &lt;summary&gt;
+            ''' Data Received from the Agent is Sent to this sub to be handled
+            ''' &lt;/summary&gt;
+            ''' &lt;param name="Response"&gt;&lt;/param&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Public MustOverride Sub PublishResponse(ByRef Response As String)
+
+            ''' &lt;summary&gt;
+            ''' UserInput Received from the Agent is sent to this sub to be handled
+            ''' &lt;/summary&gt;
+            ''' &lt;param name="UserInput"&gt;&lt;/param&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Public MustOverride Sub PublishUserInput(ByRef UserInput As String)
+
+            ''' &lt;summary&gt;
+            ''' Handles Responses From the IntelligentAgent Class
+            ''' &lt;/summary&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Public Sub ResponseRecieved(ByVal Response As String) Handles Agent.AgentResponded
+                PublishResponse(Response)
+            End Sub
+
+            ''' &lt;summary&gt;
+            ''' Sends UserInput to the Intelligent Agent
+            ''' &lt;/summary&gt;
+            ''' &lt;param name="UserInputStr"&gt;&lt;/param&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Public Sub SendUserInput(ByRef UserInputStr As String)
+                Agent.InputText(UserInputStr)
+            End Sub
+
+        End Class
+
+        ''' &lt;summary&gt;
+        ''' This Class Enables for Userinput updates and Response Updates Published by the
+        ''' intelligent agent To be Displayed or Republished for display or use
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public MustInherit Class Subscriber
+            Implements IntelligentAgentResponseObserver
+
+            Public MustOverride Sub PublishResponse(ByRef Response As String)
+
+            Public MustOverride Sub PublishUserInput(ByRef UserInput As String)
+
+            Public Sub UpdateInput(Data As String) Implements IntelligentAgentResponseObserver.UpdateInput
+                PublishUserInput(Data)
+            End Sub
+
+            Public Sub UpdateResponse(Data As String) Implements IntelligentAgentResponseObserver.UpdateResponse
+                PublishResponse(Data)
+            End Sub
+
+        End Class
+
+    End Namespace
+
+    ''' &lt;summary&gt;
+    ''' MAIN BRAIN RESPONSE Needs to be OverWritten
+    ''' &lt;/summary&gt;
+    ''' &lt;remarks&gt;&lt;/remarks&gt;
+    Public Class Artificial_Intelligence_Brain
+
+        Private MResponse As String = ""
+
+        Public ReadOnly Property Response As String
+            Get
+                Return MResponse
+            End Get
+        End Property
+
+        Public Sub New(ByRef UserInput As String)
+
+        End Sub
+
+    End Class
+
+    Public Class Devices
+
+        ''' &lt;summary&gt;
+        ''' Allows For input devices to be attached to the Intelligent Agent
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Interface InputDevice
+
+            ''' &lt;summary&gt;
+            ''' Occurs when Text is populated.
+            ''' &lt;/summary&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Event SensorTextRecieved(ByRef Recieved As Boolean)
+
+            ''' &lt;summary&gt;
+            ''' Gets a value indicating whether Sensor is activated to allow output.
+            ''' &lt;/summary&gt;
+            ''' &lt;value&gt;&lt;see langword="true"/&gt; if ; otherwise, Sensor is not Updating Text &lt;see langword="false"/&gt;.&lt;/value&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            ReadOnly Property Activated As Boolean
+
+            ''' &lt;summary&gt;
+            ''' Gets Identification.
+            ''' &lt;/summary&gt;
+            ''' &lt;value&gt;&lt;/value&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            ReadOnly Property Name As String
+
+            ''' &lt;summary&gt;
+            ''' Gets TextRecived held in Class.
+            ''' &lt;/summary&gt;
+            ''' &lt;value&gt;&lt;/value&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            ReadOnly Property RecievedText As String
+
+            ''' &lt;summary&gt;
+            ''' Activates Sensor
+            ''' &lt;/summary&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Sub Activate()
+
+            ''' &lt;summary&gt;
+            ''' Deactivates sensor
+            ''' &lt;/summary&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Sub Deactivate()
+
+        End Interface
+
+        ''' &lt;summary&gt;
+        ''' Abstract Class: Publisher / Subscriber DesignPattern This allows for clients to register
+        ''' to receive Response Updates from the Agentmodel subscribers implement this interface to
+        ''' receive notifications from the publisher
+        ''' &lt;/summary&gt;
+        Public Interface IntelligentAgentResponseObserver
+
+            ''' &lt;summary&gt;
+            ''' This is the channel to receive data from the publisher this variable needs to match
+            ''' the data being updated from the publisher
+            '''
+            ''' Inputs received to the Agent will be sent to subscribers
+            ''' &lt;/summary&gt;
+            ''' &lt;param name="Data"&gt;&lt;/param&gt;
+            Sub UpdateInput(ByVal Data As String)
+
+            ''' &lt;summary&gt;
+            ''' This is the channel to receive data from the publisher this variable needs to match
+            ''' the data being updated from the publisher
+            '''
+            ''' Responses Generated by the Agent will be sent to subscribers
+            ''' &lt;/summary&gt;
+            ''' &lt;param name="Data"&gt;&lt;/param&gt;
+            Sub UpdateResponse(ByVal Data As String)
+
+        End Interface
+
+        ''' &lt;summary&gt;
+        ''' Allows for Output devices to be attached to the Class
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Interface OutputDevice
+
+            ''' &lt;summary&gt;
+            ''' Gets a value indicating whether The device is loaded as an output device.
+            ''' &lt;/summary&gt;
+            ''' &lt;value&gt;&lt;see langword="true"/&gt; if ; otherwise, &lt;see langword="false"/&gt;.&lt;/value&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            ReadOnly Property Loaded As Boolean
+
+            ''' &lt;summary&gt;
+            ''' Activates all actuators
+            ''' &lt;/summary&gt;
+            ''' &lt;param name="Text"&gt;&lt;/param&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Sub EffectActuators(ByRef Text As String)
+
+            ''' &lt;summary&gt;
+            ''' Loads the device
+            ''' &lt;/summary&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Sub load()
+
+            ''' &lt;summary&gt;
+            ''' Unloads the device
+            ''' &lt;/summary&gt;
+            ''' &lt;remarks&gt;&lt;/remarks&gt;
+            Sub Unload()
+
+        End Interface
+
+    End Class
+
+    ''' &lt;summary&gt;
+    ''' This Class Enables for Subscribers to receive Updates from the class Inputs received from
+    ''' sensors and Response generated From evaluation Process
+    ''' 1. On Sensor input (Environment.Sensors)
+    ''' 2. Check Rules (Evaluate)
+    ''' 3. Effect Actuators (Environment.Actuators) This Class Can be used as a foundation For
+    ''' Creating Artificial intelligent Interfaces
+    ''' &lt;/summary&gt;
+    ''' &lt;remarks&gt;&lt;/remarks&gt;
+    Public Class IntelligentAgent
+
+        Public Event AgentResponded(ByVal ResponseRecieved As String)
+
+        Public Event SensorTextRecieved(ByRef Recieved As Boolean)
+
+        '---------------------------------------------------------------------------------
+        'Sensors - Input
+        '---------------------------------------------------------------------------------
+        Private WithEvents EnvironmentalSensors As New Environment.Sensors
+
+        '---------------------------------------------------------------------------------
+        'Evaluate
+        '---------------------------------------------------------------------------------
+        Private WithEvents EvaluateResponse As New Evaluate.Goals.Responder
+
+        Private mAttactchedInputDevices As New List(Of InputDevice)
+
+        ''' &lt;summary&gt;
+        ''' OutputDevices Attached can be added to this list to be actuated
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Private mAttatchedOutputDevices As New List(Of OutputDevice)
+
+        Private MinputDevices As Boolean
+
+        '---------------------------------------------------------------------------------------
+        'DEVICES : Enable for New Devices to be Added to the AgentModel
+        '---------------------------------------------------------------------------------------
+        Private MOutputDevices As Boolean = False
+
+        Private mSensorText As String
+
+        '---------------------------------------------------------------------------------------
+        'ResponseUpdate Clients
+        'Subscriber/Publisher Interface (Publisher)
+        '---------------------------------------------------------------------------------------
+        ''' &lt;summary&gt;
+        ''' Maintains a list of clients receiving Response Updates
+        ''' &lt;/summary&gt;
+        Private ResponseObservers As New List(Of IntelligentAgentResponseObserver)
+
+        'SpeechSynth : Generally the Actuator Functions would be private and automated
+        '          But For Consumption they are shared and activated as required
+        Private Speech As New Environment.Actuators.Actions.ComputerSpeechOut
+
+        Public ReadOnly Property AttachedInputDevices As List(Of InputDevice)
+            Get
+                Return mAttactchedInputDevices
+
+            End Get
+
+        End Property
+
+        Public Property AttachedOutputDevices As List(Of OutputDevice)
+            Get
+                Return mAttatchedOutputDevices
+            End Get
+            Set(value As List(Of OutputDevice))
+                mAttatchedOutputDevices = value
+            End Set
+        End Property
+
+        Public ReadOnly Property InputDevicesLoaded As Boolean
+            Get
+                Return MinputDevices
+            End Get
+        End Property
+
+        Public ReadOnly Property OutputDevicesLoaded As Boolean
+            Get
+                Return MOutputDevices
+            End Get
+        End Property
+
+        Public ReadOnly Property SensorText As String
+            Get
+                Return mSensorText
+            End Get
+        End Property
+
+        Public ReadOnly Property SpeechLoaded As Boolean
+            Get
+                Return Speech.Req
+            End Get
+        End Property
+
+        Public Sub New()
+            DisableSpeechReco()
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Interactions with the environmental Products
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Class Environment
+
+            ''' &lt;summary&gt;
+            ''' Actions to be performed in the environment
+            ''' &lt;/summary&gt;
+            Public Class Actuators
+
+                ''' &lt;summary&gt;
+                ''' Actions can be modeled from this class
+                ''' &lt;/summary&gt;
+                Public Class Actions
+
+                    Public Class ComputerSpeechOut
+
+                        Private mNeeded As Boolean = False
+
+                        Public ReadOnly Property Req As Boolean
+                            Get
+                                Return mNeeded
+                            End Get
+                        End Property
+
+                        Public Sub Activate()
+                            mNeeded = True
+                        End Sub
+
+                        Public Sub DeActivate()
+                            mNeeded = False
+                        End Sub
+
+                        Public Sub SpeakText(ByRef Txt As String)
+                            If Req = True Then
+
+                                Dim Speechout As New Speech.Synthesis.SpeechSynthesizer
+                                Speechout.Speak(Txt)
+                            Else
+
+                            End If
+                        End Sub
+
+                    End Class
+
+                End Class
+
+            End Class
+
+            ''' &lt;summary&gt;
+            ''' Receives Signals from outside sensors, To send input a reference to the instance of
+            ''' the agent model sensor class for each sensor in the class new sensors can be created
+            ''' by shadowing this class
+            ''' &lt;/summary&gt;
+            Public Class Sensors
+
+                Public Event SensorsRecievedText()
+
+                ''' &lt;summary&gt;
+                ''' Speech recognition Sensor
+                ''' &lt;/summary&gt;
+                ''' &lt;remarks&gt;&lt;/remarks&gt;
+                Private WithEvents Speech As New SpeechSensor
+
+                ''' &lt;summary&gt;
+                ''' Text Sensor Which can be used as an input
+                ''' &lt;/summary&gt;
+                ''' &lt;remarks&gt;&lt;/remarks&gt;
+                Private WithEvents Text As New TextSensor
+
+                Private NewSensorText As String
+
+                Public ReadOnly Property SensorText As String
+                    Get
+                        Return NewSensorText
+                    End Get
+                End Property
+
+                Public Property SpeechRecognitionEnabled As Boolean = False
+
+                Public Class SpeechSensor
+
+                    ''' &lt;summary&gt;
+                    ''' Speech Sensor received text
+                    ''' &lt;/summary&gt;
+                    Public Event OutputTextChanged()
+
+                    ''' &lt;summary&gt;
+                    ''' event handler for SPeech recognition interface
+                    ''' &lt;/summary&gt;
+                    Private WithEvents Speech As SpeechRecognition
+
+                    ''' &lt;summary&gt;
+                    ''' Variable for Received text
+                    ''' &lt;/summary&gt;
+                    Private mRecievedtext As String
+
+                    ''' &lt;summary&gt;
+                    ''' Text received
+                    ''' &lt;/summary&gt;
+                    ''' &lt;returns&gt;&lt;/returns&gt;
+                    Public Property RecievedText As String
+                        Get
+                            Return mRecievedtext
+                        End Get
+                        Set(value As String)
+                            RaiseEvent OutputTextChanged()
+                            mRecievedtext = value
+                        End Set
+                    End Property
+
+                    Public Sub New()
+                        StartListener()
+                    End Sub
+
+                    Private Class SpeechRecognition
+
+                        Public Event OutputTextChanged(ByVal Output As Boolean)
+
+                        ''' &lt;summary&gt;
+                        ''' enables voice recognition engine
+                        ''' &lt;/summary&gt;
+                        ''' &lt;remarks&gt;&lt;/remarks&gt;
+                        Private WithEvents RecoEngine As New Speech.Recognition.SpeechRecognitionEngine()
+
+                        Private mOutputText As String = ""
+
+                        ''' &lt;summary&gt;
+                        ''' Text recived from Speech recognition
+                        ''' &lt;/summary&gt;
+                        ''' &lt;returns&gt;&lt;/returns&gt;
+                        Public Property OutputText As String
+                            Get
+                                Return mOutputText
+                            End Get
+                            Set(value As String)
+                                mOutputText = value
+                                RaiseEvent OutputTextChanged(True)
+                            End Set
+                        End Property
+
+                        Public Sub New()
+                            SetupRecognition()
+                        End Sub
+
+                        ''' &lt;summary&gt;
+                        ''' Activated on completion of recognition
+                        ''' &lt;/summary&gt;
+                        ''' &lt;param name="sender"&gt;&lt;/param&gt;
+                        ''' &lt;param name="e"&gt;     &lt;/param&gt;
+                        ''' &lt;remarks&gt;&lt;/remarks&gt;
+                        Private Sub RecoEngine_RecognizeCompleted(ByVal sender As Object, ByVal e As System.Speech.Recognition.RecognizeCompletedEventArgs) Handles RecoEngine.RecognizeCompleted
+                            RecoEngine.RecognizeAsync()
+                        End Sub
+
+                        ''' &lt;summary&gt;
+                        ''' On recognizing speech the input is sent to the response routine
+                        ''' &lt;/summary&gt;
+                        ''' &lt;param name="sender"&gt;&lt;/param&gt;
+                        ''' &lt;param name="e"&gt;     &lt;/param&gt;
+                        ''' &lt;remarks&gt;&lt;/remarks&gt;
+                        Private Sub RecoEngine_SpeechRecognized(ByVal sender As Object, ByVal e As System.Speech.Recognition.RecognitionEventArgs) Handles RecoEngine.SpeechRecognized
+                            'a call to act is required here
+                            OutputText = e.Result.Text
+                        End Sub
+
+                        Private Sub SetupRecognition()
+                            RecoEngine.LoadGrammar(New Speech.Recognition.DictationGrammar())
+                            RecoEngine.SetInputToDefaultAudioDevice()
+                            RecoEngine.RecognizeAsync()
+                        End Sub
+
+                    End Class
+
+                    ''' &lt;summary&gt;
+                    ''' Event handler for new speech recognized as texts
+                    ''' &lt;/summary&gt;
+                    Private Sub SpeechRecieved() Handles Speech.OutputTextChanged
+                        RecievedText = Speech.OutputText
+
+                    End Sub
+
+                    ''' &lt;summary&gt;
+                    ''' Starts the speech Sensor Receiver
+                    ''' &lt;/summary&gt;
+                    Private Sub StartListener()
+                        Speech = New SpeechRecognition
+                    End Sub
+
+                    ''' &lt;summary&gt;
+                    ''' Outputs Speech to Sensor
+                    ''' &lt;/summary&gt;
+                    ''' &lt;param name="NewText"&gt;&lt;/param&gt;
+                    Public Shared Sub SpeakText(ByRef NewText As String)
+                        Dim SpeechSynth As New Speech.Synthesis.SpeechSynthesizer
+                        SpeechSynth.Speak(NewText)
+                    End Sub
+
+                End Class
+
+                Public Class TextSensor
+
+                    Public Event TextRecieved()
+
+                    Private NewSensorText As String
+
+                    Public Property SensorText As String
+                        Get
+                            Return NewSensorText
+                        End Get
+                        Set(value As String)
+                            NewSensorText = value
+                            RaiseEvent TextRecieved()
+                        End Set
+                    End Property
+
+                End Class
+
+                Private Sub SpeechRecieved() Handles Speech.OutputTextChanged
+                    If SpeechRecognitionEnabled = True Then
+                        NewSensorText = Speech.RecievedText
+                        RaiseEvent SensorsRecievedText()
+                    Else
+
+                    End If
+
+                End Sub
+
+                Private Sub TextRecieved() Handles Text.TextRecieved
+                    NewSensorText = Text.SensorText
+                    RaiseEvent SensorsRecievedText()
+                End Sub
+
+                ''' &lt;summary&gt;
+                ''' Enables for Manual TextInput
+                ''' &lt;/summary&gt;
+                ''' &lt;param name="InputStr"&gt;&lt;/param&gt;
+                ''' &lt;remarks&gt;&lt;/remarks&gt;
+                Public Sub InputText(ByRef InputStr As String)
+                    Text.SensorText = InputStr
+
+                End Sub
+
+            End Class
+
+        End Class
+
+        '----------------------------------------------------------------------------------------
+        'AGENT MAIN
+        '----------------------------------------------------------------------------------------
+        ''' &lt;summary&gt;
+        ''' Evaluate sensor information , Return action to be completed evaluation has target goals
+        ''' as well as preset goals percepts are potentially allowable tolerance levels
+        ''' &lt;/summary&gt;
+        Public Class Evaluate
+            '1. Get perceptions
+            '   a. Define Properties
+            '   b. Produce Requested Analysis
+            '2. Check Goals
+            '   a. Perform Actions
+            '   b. Evaluate Responses
+            '   c. Return Response
+
+            ''' &lt;summary&gt;
+            ''' Goals can be modeled using this class Agent Goals
+            ''' &lt;/summary&gt;
+            Public Class Goals
+
+                ''' &lt;summary&gt;
+                ''' Generates Response Based on GetResponseFunction
+                ''' &lt;/summary&gt;
+                ''' &lt;remarks&gt;&lt;/remarks&gt;
+                Public Class Responder
+
+                    Public Event ResponseFound()
+
+                    Private mResponse As String
+
+                    Public ReadOnly Property Response As String
+                        Get
+                            Return mResponse
+                        End Get
+                    End Property
+
+                    ''' &lt;summary&gt;
+                    ''' Brain Function:
+                    '''
+                    ''' Provides an Output in xResponse and Response in Class And Raises Event ResponseFound
+                    ''' &lt;/summary&gt;
+                    ''' &lt;param name="UserInput"&gt;&lt;/param&gt;
+                    ''' &lt;remarks&gt;&lt;/remarks&gt;
+                    Public Sub GetResponse(ByRef UserInput As String)
+                        'Response to be populated
+                        Dim XResponse As String = ""
+
+                        'SubMain Area to Create Brain Functions
+                        '--------------------------------------
+
+                        Dim AI As New Artificial_Intelligence_Brain(UserInput)
+                        XResponse = AI.Response
+
+                        '--------------------------------------
+                        'Must KEEP:
+                        '--------------------------------------
+                        'Populate Response if none is Found
+                        If XResponse = "" Then XResponse = UserInput &amp; "?"
+                        'Raise event that response is populated
+                        mResponse = XResponse
+                        RaiseEvent ResponseFound()
+
+                    End Sub
+
+                End Class
+
+            End Class
+
+            ''' &lt;summary&gt;
+            ''' Percepts can be modeled from this class Comparative Sensor Markers/Milestones;
+            ''' Analysis of input data to produce Results to be evaluated or displayed.
+            ''' &lt;/summary&gt;
+            Public Class Percepts
+
+                'Evaluate Text : Actions Learning
+                'Respond
+
+            End Class
+
+        End Class
+
+        ''' &lt;summary&gt;
+        ''' Effects all Activated Actuators
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Private Sub EffectActuators(ByRef Response As String)
+            'SpeechReQ?
+            If Speech.Req = True Then
+                EffectActuatorsSpeech(Response)
+            Else
+            End If
+
+            EffectActuatorsDevices(Response)
+
+            'Notify All Observers
+            NotifyResponseObserver(Response)
+
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Effects the output devices Loaded
+        ''' &lt;/summary&gt;
+        ''' &lt;param name="mText"&gt;&lt;/param&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Private Sub EffectActuatorsDevices(ByRef mText As String)
+            For Each device As OutputDevice In AttachedOutputDevices
+                If device.Loaded = True Then
+                    device.EffectActuators(mText)
+                End If
+            Next
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Evaluates Text Received
+        ''' &lt;/summary&gt;
+        ''' &lt;param name="RecivedText"&gt;If set to &lt;see langword="true"/&gt;, then ; otherwise, .&lt;/param&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Private Sub EvaluateText(ByRef RecivedText As Boolean) Handles Me.SensorTextRecieved
+            '2. Check Rules         &lt;Evaluate&gt;
+            'Notify Input
+            NotifyInputObserver(SensorText)
+            'Evaluate input get O
+            Dim Response As String = ""
+            EvaluateResponse.GetResponse(SensorText)
+
+        End Sub
+
+        Private Sub NotifyInputObserver(ByVal Data As String)
+            If ResponseObservers IsNot Nothing Then
+                For Each observer As IntelligentAgentResponseObserver In ResponseObservers
+                    observer.UpdateInput(Data)
+                Next
+            Else
+            End If
+
+        End Sub
+
+        Private Sub NotifyResponseObserver(ByVal Data As String)
+            If ResponseObservers IsNot Nothing Then
+                For Each observer As IntelligentAgentResponseObserver In ResponseObservers
+                    observer.UpdateResponse(Data)
+                Next
+            Else
+            End If
+        End Sub
+
+        Private Sub ResponseRecieved() Handles EvaluateResponse.ResponseFound
+            EffectActuators(EvaluateResponse.Response)
+            RaiseEvent AgentResponded(EvaluateResponse.Response)
+        End Sub
+
+        Private Sub UpdateSensorText() Handles EnvironmentalSensors.SensorsRecievedText
+            mSensorText = EnvironmentalSensors.SensorText
+            RaiseEvent SensorTextRecieved(True)
+        End Sub
+
+        Public Sub ActivateInputDevices()
+            If mAttactchedInputDevices IsNot Nothing Then
+                For Each device As InputDevice In mAttactchedInputDevices
+                    device.Activate()
+                Next
+            Else
+            End If
+
+        End Sub
+
+        Public Sub AddInputDevice(ByRef NewDevice As InputDevice)
+            mAttactchedInputDevices.Add(NewDevice)
+        End Sub
+
+        Public Sub AddOutputDevice(ByRef mDevice As OutputDevice)
+            mAttatchedOutputDevices.Add(mDevice)
+        End Sub
+
+        Public Sub DeActivateInputDevices()
+            If mAttactchedInputDevices IsNot Nothing Then
+                For Each device As InputDevice In mAttactchedInputDevices
+                    device.Deactivate()
+                Next
+            Else
+            End If
+
+        End Sub
+
+        Public Sub DisableSpeechReco()
+            EnvironmentalSensors.SpeechRecognitionEnabled = False
+
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Activates speech
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Sub EffectActuatorsActivateSpeech()
+            Speech.Activate()
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' DeActivates Speech
+        ''' &lt;/summary&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Sub EffectActuatorsDeActivateSpeech()
+            Speech.DeActivate()
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Must be activated
+        ''' &lt;/summary&gt;
+        ''' &lt;param name="InputStr"&gt;&lt;/param&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Sub EffectActuatorsSpeech(ByRef InputStr As String)
+            Speech.SpeakText(InputStr)
+        End Sub
+
+        Public Sub EnableSpeechReco()
+            EnvironmentalSensors.SpeechRecognitionEnabled = True
+
+        End Sub
+
+        ''' &lt;summary&gt;
+        ''' Activates TextSensor
+        ''' &lt;/summary&gt;
+        ''' &lt;param name="InputStr"&gt;&lt;/param&gt;
+        ''' &lt;remarks&gt;&lt;/remarks&gt;
+        Public Sub InputText(ByRef InputStr As String)
+            EnvironmentalSensors.InputText(InputStr)
+            RaiseEvent SensorTextRecieved(True)
+        End Sub
+
+        Public Sub LoadOutputDevices()
+            If AttachedOutputDevices IsNot Nothing Then
+                For Each device As OutputDevice In AttachedOutputDevices
+                    device.load()
+                Next
+            Else
+            End If
+
+        End Sub
+
+        Public Sub RegisterResponseObserver(ByVal mObserver As IntelligentAgentResponseObserver)
+            Try
+                ResponseObservers.Add(mObserver)
+            Catch ex As Exception
+
+            End Try
+
+        End Sub
+
+        Public Sub RemoveResponseObserver(ByVal mObserver As IntelligentAgentResponseObserver)
+            Try
+                ResponseObservers.Remove(mObserver)
+            Catch ex As Exception
+
+            End Try
+
+        End Sub
+
+        Public Sub UnloadOutputDevices()
+            If AttachedOutputDevices IsNot Nothing Then
+                For Each device As OutputDevice In AttachedOutputDevices
+                    device.Unload()
+                Next
+            Else
+            End If
+
+        End Sub
+
+    End Class
+
+End Namespace</Value>
+    </Setting>
+    <Setting Name="Info" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">This Class Enables for Subscribers to receive Updates from the class Inputs received from
+sensors and Response generated From evaluation Process
+
+1. On Sensor input (Environment.Sensors)
+2. Check Rules (Evaluate)
+3. Effect Actuators (Environment.Actuators) This Class Can be used as a foundation For
+Creating Artificial intelligent Interfaces</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
