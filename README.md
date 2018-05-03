@@ -1,4 +1,4 @@
-# SpydazWebAI_IntelligentAgent
+# SpydazWebAI_IntelligentAgent Partof the SpydazWebAI project
 Welcome to the SpydazWebAI_IntelligentAgent wiki!
 
 
