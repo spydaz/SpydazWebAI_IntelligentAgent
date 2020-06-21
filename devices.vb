@@ -1,5 +1,8 @@
 ﻿Namespace AI_AGENT
 
+    ''' <summary>
+    ''' These are the Device Models Required for creating Input and Output devices which can be attached to the Intelligent Agent
+    ''' </summary>
     Public Class Devices
 
         ''' <summary>

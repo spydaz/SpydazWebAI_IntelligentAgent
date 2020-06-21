@@ -104,6 +104,8 @@ Namespace AI_AGENT
 
         Public Sub New()
             DisableSpeechReco()
+
+
         End Sub
 
         ''' <summary>

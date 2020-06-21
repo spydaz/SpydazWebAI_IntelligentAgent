@@ -9,7 +9,6 @@
     Public Class Artificial_Intelligence_Brain
 
         Private MResponse As String = ""
-        Private AI As New IntelligentAgent
         Public ReadOnly Property Response As String
             Get
                 Return MResponse
@@ -17,13 +16,21 @@
         End Property
 
         Public Sub New()
+            MResponse = ""
 
         End Sub
+
+
+        ''' <summary>
+        ''' This is the main Function Called by the Agent 
+        ''' </summary>
+        ''' <param name="Userinput"></param>
+        ''' <param name="Response"></param>
+        ''' <returns></returns>
         Public Function GetResponse(ByRef Userinput As String, Response As String) As Boolean
             GetResponse = False
-
-
         End Function
+
 
 
     End Class
